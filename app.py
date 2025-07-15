@@ -4,6 +4,10 @@ import threading
 from flask import Flask, request, render_template, send_file, abort
 from bot.obfuscator import obfuscate
 
+# ✅ Load environment variables from .env
+from dotenv import load_dotenv
+load_dotenv()
+
 # Discord bot setup
 import discord
 
