@@ -25,7 +25,7 @@ def do_obfuscate():
         return send_file(
             buffer,
             as_attachment=True,
-            download_name='Velonix_Obfuscated.lua',
+            download_name='UnityEngine_Obfuscated.lua',
             mimetype='text/plain'
         )
     except Exception as e:
