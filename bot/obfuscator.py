@@ -1,11 +1,12 @@
+import re
+
 def code(text: str) -> str:
-    """Encodes text to hex escape format (\xNN)"""
-    return ''.join('\\x{:02x}'.format(ord(c)) for c in text)
+    return ''.join(f'\\x{ord(c):02x}' for c in text)
 
 def tamper(encoded_code: str) -> str:
-    return r'''
+    return f'''
 local tamper_guard=(function() 
-  local check = ("''' + encoded_code + r'''"):gsub("\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end) 
+  local check = ("{encoded_code}"):gsub("\\\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end) 
   local ok = true 
   for i = 1, #check do 
     local b = check:sub(i, i) 
@@ -17,16 +18,7 @@ assert(tamper_guard, "Script integrity check failed")
 '''.strip()
 
 def obfuscate(lua_source: str) -> str:
-    """Main obfuscation function"""
     encoded = code(lua_source)
-    tamper_block = tamper(encoded)
+    tamper = tamper(encoded)
     return f'''
--- [[ Velonix Obfuscator v1.2.7 ]]
-return (function()
-{tamper_block}
-local src=("{encoded}"):gsub("\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end)
-local loader=loadstring or load
-local run=loader(src)
-return run()
-end)()
-'''.strip()
+-- [[ Velonix Obfuscator v1.2.7 ]] return (function() {tamper} local src=("{encoded}"):gsub("\\\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end) local loader=loadstring or load local run=loader(src) return run() end)() '''.strip()
