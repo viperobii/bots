@@ -3,11 +3,16 @@ import io
 import os
 from bot.obfuscator import obfuscate
 
+# Load .env if token isn't already set
 if "DISCORD_BOT_TOKEN" not in os.environ:
     from dotenv import load_dotenv
     load_dotenv()
 
 TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+print("[DEBUG] Loaded token:", "Yes" if TOKEN else "No")
+
+if not TOKEN or not TOKEN.strip():
+    raise RuntimeError("DISCORD_BOT_TOKEN is missing or empty")
 
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
@@ -32,7 +37,10 @@ class VelonixBot(discord.Client):
                 file=discord.File(buf, filename="Velonix_Obfuscated.lua")
             )
 
+    async def on_error(self, event_method, *args, **kwargs):
+        import traceback
+        print(f"[ERROR] in event: {event_method}")
+        traceback.print_exc()
+
 if __name__ == '__main__':
-    if not TOKEN:
-        raise RuntimeError("DISCORD_BOT_TOKEN not set")
     VelonixBot(intents=INTENTS).run(TOKEN)
