@@ -3,10 +3,9 @@ def code(text: str) -> str:
     return ''.join('\\x{:02x}'.format(ord(c)) for c in text)
 
 def tamper(encoded_code: str) -> str:
-    """Generates tamper check block in Lua"""
-    return f'''
+    return r'''
 local tamper_guard=(function() 
-  local check = ("{encoded_code}"):gsub("\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end) 
+  local check = ("''' + encoded_code + r'''"):gsub("\\x(%x%x)", function(h) return string.char(tonumber(h, 16)) end) 
   local ok = true 
   for i = 1, #check do 
     local b = check:sub(i, i) 
