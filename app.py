@@ -11,20 +11,26 @@ def index():
 
 @app.route('/obfuscate', methods=['POST'])
 def do_obfuscate():
-    file = request.files.get('file')
-    if not file or not file.filename.lower().endswith(('.lua', '.txt')):
-        abort(400, "Invalid file type. Only .lua or .txt allowed.")
-    
-    src = file.read().decode('utf-8', errors='ignore')
-    obf = obfuscate(src)
-    
-    buffer = io.BytesIO(obf.encode('utf-8'))
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name='Velonix_Obfuscated.lua',
-        mimetype='text/plain'
-    )
+    try:
+        file = request.files.get('file')
+        if not file or not file.filename.lower().endswith(('.lua', '.txt')):
+            abort(400, "Invalid file type. Only .lua or .txt allowed.")
+
+        src = file.read().decode('utf-8', errors='ignore')
+        obf = obfuscate(src)
+
+        buffer = io.BytesIO(obf.encode('utf-8'))
+        buffer.seek(0)  # Important for reading from start
+
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name='Velonix_Obfuscated.lua',
+            mimetype='text/plain'
+        )
+    except Exception as e:
+        print(f"[ERROR] Obfuscation failed: {e}")
+        abort(500, f"Internal Server Error: {e}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=True)
